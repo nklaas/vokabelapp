@@ -1,7 +1,7 @@
 # Rulebook for vocab entries
 
-How Claude Code creates and imports words for the shared pool. Learners: German native speakers at B2 in English
-and Spanish who want to reach C1 and beyond.
+How Claude Code creates and imports words for the shared pool. Learners: German native speakers; the admin is
+officially B2 in both languages, with English clearly stronger (see target levels below).
 
 ## Workflow
 
@@ -19,8 +19,11 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
 
 ## Choosing words
 
-- Level **B2 to C2**, mostly C1. Skip basic words a B2 learner certainly knows (*la casa*, *to buy*), unless the user
-  asks for them.
+- Level per language, unless the user asks otherwise:
+  - **English: C1–C2.** The user's English is beyond B2; skip words a strong B2/C1 speaker already knows
+    (*workload*, *cover letter*). Favor sophisticated but genuinely used words: figurative phrasal verbs, idioms,
+    words from quality journalism, literature and professional life.
+  - **Spanish: B2–C1**, mostly C1 (the user's Spanish is a bit rusty). Skip basic words (*la casa*, *comprar*).
 - **Use every word type that fits the topic**, not only nouns, verbs and adjectives. Every batch should also
   contain, where the topic offers them: adverbs (*nevertheless*, *a regañadientes*), prepositions and prepositional
   phrases (*notwithstanding*, *en aras de*), conjunctions and connectors (*whereas*, *puesto que*), discourse
