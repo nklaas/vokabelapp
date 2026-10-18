@@ -21,7 +21,12 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
 
 - Level **B2 to C2**, mostly C1. Skip basic words a B2 learner certainly knows (*la casa*, *to buy*), unless the user
   asks for them.
-- Mix word types like a textbook chapter: nouns, verbs, adjectives, adverbs, set phrases.
+- **Use every word type that fits the topic**, not only nouns, verbs and adjectives. Every batch should also
+  contain, where the topic offers them: adverbs (*nevertheless*, *a regañadientes*), prepositions and prepositional
+  phrases (*notwithstanding*, *en aras de*), conjunctions and connectors (*whereas*, *puesto que*), discourse
+  markers (*by the same token*, *de hecho*), idioms and set phrases (*to cut corners*, *estar hasta las narices*),
+  collocations and phrasal verbs. Use `phrase` for multi-word expressions and `other` for anything that fits no
+  category.
 - Prefer words that are genuinely used in news, books, work and conversation over rare curiosities.
 - Group words into **clusters** = topics with English names ("Environment & Climate", "Work & Career").
   Reuse an existing cluster when it fits; a cluster typically holds 20–40 words.

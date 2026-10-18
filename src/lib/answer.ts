@@ -1,6 +1,7 @@
 // Answer checking (see docs/SPEC.md, "Learning").
 // Case, surrounding punctuation and extra spaces never matter; accents always do.
-// Spanish nouns need their article, English verbs may omit "to", German nouns may omit the article.
+// Spanish nouns need their article, English verbs and infinitive phrases may omit "to",
+// German nouns may omit the article.
 import type { Direction, Vocab } from '../types'
 
 export interface CheckResult {
@@ -27,7 +28,8 @@ function normalize(s: string): string {
 function key(s: string, vocab: Vocab, direction: Direction): string {
   let k = normalize(s)
   if (direction === 'to_german') k = k.replace(GERMAN_ARTICLE, '')
-  else if (vocab.language === 'en' && vocab.word_type === 'verb') k = k.replace(/^to\s+/, '')
+  // "to" is optional for verbs and infinitive phrases ("to cut corners").
+  else if (vocab.language === 'en' && /^to\s/i.test(vocab.term)) k = k.replace(/^to\s+/, '')
   return k
 }
 
