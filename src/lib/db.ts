@@ -69,9 +69,11 @@ export async function resetCards(cardIds: string[], dueAt: string): Promise<Card
   return data as Card[]
 }
 
-export async function deleteCard(cardId: string): Promise<void> {
-  const { error } = await supabase.from('cards').delete().eq('id', cardId)
-  if (error) throw error
+export async function deleteCards(cardIds: string[]): Promise<void> {
+  for (let i = 0; i < cardIds.length; i += 100) {
+    const { error } = await supabase.from('cards').delete().in('id', cardIds.slice(i, i + 100))
+    if (error) throw error
+  }
 }
 
 export async function saveReview(

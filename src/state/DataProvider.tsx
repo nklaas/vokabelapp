@@ -45,7 +45,11 @@ export function DataProvider({ userId, children }: { userId: string; children: R
           for (const c of cards) byId.set(c.id, c)
           return { ...s, cards: [...byId.values()] }
         }),
-      removeCard: (id) => update((s) => ({ ...s, cards: s.cards.filter((c) => c.id !== id) })),
+      removeCards: (ids) =>
+        update((s) => {
+          const gone = new Set(ids)
+          return { ...s, cards: s.cards.filter((c) => !gone.has(c.id)) }
+        }),
       putVocab: (v) =>
         update((s) => {
           const vocab = s.vocab.some((x) => x.id === v.id)

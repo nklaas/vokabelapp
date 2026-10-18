@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { activate } from '../lib/activation'
-import { deleteCard, deleteVocab, saveNote } from '../lib/db'
+import { deleteCards, deleteVocab, saveNote } from '../lib/db'
 import { formatDue } from '../lib/format'
 import { errorMessage, useData } from '../state/data'
 import { FOLDERS, type Card, type Direction, type Vocab } from '../types'
@@ -17,7 +17,7 @@ function status(card: Card | undefined): string {
 /** A word from the pool: details, personal note, activation per direction, admin editing. */
 export function WordSheet({ vocab, onClose }: { vocab: Vocab; onClose: () => void }) {
   const data = useData()
-  const { cards, notes, profile, settings, userId, putCards, removeCard, removeVocab, setNote, toast } = data
+  const { cards, notes, profile, settings, userId, putCards, removeCards, removeVocab, setNote, toast } = data
   const [editing, setEditing] = useState(false)
   const [note, setNoteText] = useState(notes.get(vocab.id) ?? '')
   const [busy, setBusy] = useState(false)
@@ -45,8 +45,8 @@ export function WordSheet({ vocab, onClose }: { vocab: Vocab; onClose: () => voi
   const deactivate = (c: Card) =>
     run(async () => {
       if (!window.confirm('Deactivate? The progress in this direction is lost.')) return
-      await deleteCard(c.id)
-      removeCard(c.id)
+      await deleteCards([c.id])
+      removeCards([c.id])
     })
 
   const saveMyNote = () =>

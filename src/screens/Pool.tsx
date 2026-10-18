@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Sheet } from '../components/Sheet'
 import { WordSheet } from '../components/WordSheet'
 import { activate } from '../lib/activation'
+import { deleteCards } from '../lib/db'
 import { LANGUAGE_NAME } from '../lib/format'
 import { loadPref, savePref } from '../lib/storage'
 import { errorMessage, useData } from '../state/data'
@@ -20,7 +21,7 @@ interface Pending {
 }
 
 export function Pool() {
-  const { vocab, vocabById, cards, clusters, settings, putCards, toast } = useData()
+  const { vocab, vocabById, cards, clusters, settings, putCards, removeCards, toast } = useData()
   const [language, setLanguageState] = useState<Language>(() => loadPref('poolLanguage', 'en', LANGUAGES))
   const [search, setSearch] = useState('')
   const [cluster, setCluster] = useState('')
@@ -31,6 +32,7 @@ export function Pool() {
   const [limit, setLimit] = useState(PAGE)
   const [openId, setOpenId] = useState<string | null>(null)
   const [pending, setPending] = useState<Pending | null>(null)
+  const [deactivating, setDeactivating] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const folders = FOLDERS.filter((f) => f.language === language)
@@ -107,6 +109,27 @@ export function Pool() {
     }
   }
 
+  /** Cards of the selected words in the given directions. */
+  function selectedCards(directions: Direction[]): Card[] {
+    return [...selected].flatMap((id) => directions.map((d) => cardsByVocab.get(id)?.[d]).filter((c): c is Card => !!c))
+  }
+
+  async function runDeactivation(directions: Direction[]) {
+    const target = selectedCards(directions)
+    setBusy(true)
+    try {
+      await deleteCards(target.map((c) => c.id))
+      removeCards(target.map((c) => c.id))
+      toast(`${target.length} activation${target.length === 1 ? '' : 's'} removed (back to phase 0).`)
+      setSelected(new Set())
+      setDeactivating(false)
+    } catch (e) {
+      toast(errorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const allFilteredSelected = filtered.length > 0 && filtered.every((v) => selected.has(v.id))
   const openVocab = openId ? vocabById.get(openId) : undefined
 
@@ -176,7 +199,10 @@ export function Pool() {
         <div className="selection-bar">
           <div className="selection-info">
             <strong>{selected.size} selected</strong>
-            <button className="btn ghost small" onClick={() => setSelected(new Set())}>Clear</button>
+            <span className="selection-tools">
+              <button className="btn ghost small danger-text" onClick={() => setDeactivating(true)}>Deactivate…</button>
+              <button className="btn ghost small" onClick={() => setSelected(new Set())}>Clear</button>
+            </span>
           </div>
           <div className="selection-actions">
             <span className="muted small">Activate</span>
@@ -217,6 +243,26 @@ export function Pool() {
             <button className="btn primary" disabled={busy || pending.fresh.length === 0} onClick={() => runActivation(pending, false)}>
               {pending.existing.length ? 'Skip them' : 'Activate'}
             </button>
+          </div>
+        </Sheet>
+      )}
+
+      {deactivating && (
+        <Sheet title="Deactivate words" onClose={() => setDeactivating(false)}>
+          <p>
+            Puts the selected words back to phase 0. <strong>Their progress in that direction is lost.</strong>
+          </p>
+          <div className="deactivate-options">
+            {[...folders.map((f) => ({ label: f.label, directions: [f.direction] })),
+              { label: 'Both directions', directions: folders.map((f) => f.direction) }].map((o) => {
+              const count = selectedCards(o.directions).length
+              return (
+                <button key={o.label} className="btn danger" disabled={busy || count === 0}
+                  onClick={() => runDeactivation(o.directions)}>
+                  {o.label} <span className="muted small">({count} active)</span>
+                </button>
+              )
+            })}
           </div>
         </Sheet>
       )}

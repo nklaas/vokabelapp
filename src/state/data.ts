@@ -14,7 +14,7 @@ export interface Data {
   reload: () => Promise<void>
   /** Replace or add cards in local state after a successful write. */
   putCards: (cards: Card[]) => void
-  removeCard: (cardId: string) => void
+  removeCards: (cardIds: string[]) => void
   putVocab: (vocab: Vocab) => void
   removeVocab: (vocabId: string) => void
   putCluster: (cluster: Cluster) => void

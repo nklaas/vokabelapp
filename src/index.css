@@ -467,3 +467,7 @@ a.folder:active { transform: scale(0.98); }
 .setting-row:first-of-type { border-top: 0; }
 .setting-row > span { display: flex; flex-direction: column; }
 .setting-row > input:not([type='checkbox']) { width: 140px; }
+
+.selection-tools { display: flex; gap: 4px; }
+.btn.danger-text { color: var(--bad); }
+.deactivate-options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
