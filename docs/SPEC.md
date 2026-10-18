@@ -71,5 +71,5 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 2. Core app: login, pool with bulk activation, learning sessions, settings. ← done
 3. Claude Code workflow: vocab rulebook (`docs/VOCAB_RULES.md`), import script, example cluster (Spanish,
    "Environment & Climate", ~25 words). ← done
-4. Deploy to GitHub Pages (public repo), PNG icons, install on iPhone.
+4. Deploy to GitHub Pages (public repo), PNG icons, install on iPhone. ← done (https://nklaas.github.io/vokabelapp/)
 5. Later features.
