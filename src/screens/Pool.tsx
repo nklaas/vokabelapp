@@ -179,9 +179,10 @@ export function Pool() {
             <button className="btn ghost small" onClick={() => setSelected(new Set())}>Clear</button>
           </div>
           <div className="selection-actions">
+            <span className="muted small">Activate</span>
             {folders.map((f) => (
               <button key={f.direction} className="btn primary" disabled={busy} onClick={() => startActivation(f.direction)}>
-                Activate {f.label}
+                {f.label}
               </button>
             ))}
           </div>

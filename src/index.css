@@ -419,7 +419,8 @@ a.folder:active { transform: scale(0.98); }
 
 .selection-info, .selection-actions { max-width: 680px; margin: 0 auto; display: flex; gap: 8px; align-items: center; }
 .selection-info { justify-content: space-between; margin-bottom: 8px; }
-.selection-actions .btn { flex: 1; padding: 10px 8px; font-size: 0.9rem; }
+.selection-actions .btn { flex: 1; min-width: 0; padding: 10px 8px; font-size: 0.9rem; white-space: normal; }
+.selection-actions > span { flex-shrink: 0; }
 
 .existing-list { max-height: 30dvh; overflow-y: auto; padding-left: 20px; }
 .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 16px; }
