@@ -22,7 +22,7 @@ export function WordDetail({ vocab }: { vocab: Vocab }) {
         {vocab.word_type && <span className="badge">{vocab.word_type}</span>}
         {vocab.gender && <span className="badge">{GENDER[vocab.gender]}</span>}
         {vocab.level && <span className="badge">{vocab.level}</span>}
-        {vocab.region && <span className="badge region">only {vocab.region}</span>}
+        {vocab.region && <span className="badge region">mainly {vocab.region}</span>}
         {vocab.is_draft && <span className="badge draft">draft</span>}
       </div>
 
