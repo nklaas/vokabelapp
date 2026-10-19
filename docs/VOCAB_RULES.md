@@ -31,6 +31,12 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
   collocations and phrasal verbs. Use `phrase` for multi-word expressions and `other` for anything that fits no
   category.
 - Prefer words that are genuinely used in news, books, work and conversation over rare curiosities.
+- **Skip words whose German translation gives the answer away**: anglicisms and obvious cognates used in German
+  (*to outsource* → *outsourcen*, *to delegate* → *delegieren*, *sabbatical* → *das Sabbatical*, *la crisis* →
+  *die Krise*). They teach nothing. Only include such a word if it has a meaning, use or trap a German would not
+  guess (false friends, a different main sense, tricky preposition); then put that in `notes`.
+  The same applies to single translations: never list a cognate (*outsourcen*, *jonglieren*) next to the real German
+  equivalents, because in German → foreign all translations are shown as the question and would give it away.
 - Group words into **clusters** = topics with English names ("Environment & Climate", "Work & Career").
   Reuse an existing cluster when it fits; a cluster typically holds 20–40 words.
 

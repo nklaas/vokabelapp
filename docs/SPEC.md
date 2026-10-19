@@ -50,6 +50,13 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 - Wrongly answered words come back at the end of the session until answered correctly (does not change the phase again).
 - Session length is capped (setting, default 30); due words are shuffled.
 - A repeated (previously wrong) word offers two choices: count as correct / repeat again.
+- **Guided tour for new words:** a word not answered since it was (re)activated is first shown as its full card
+  (question and solution, "Got it"). New words come in batches of 5: the 5 cards, then their questions mixed with
+  regular due words, then the next 5. The answer right after the tour does not move the word forward: it stays in
+  phase 1 and is due again tomorrow (interval 1). A wrong answer there offers: count as correct / repeat again.
+- The progress bar counts finished words: a wrongly answered word only counts once it is answered correctly.
+- The end of a session shows how many words are still due now and how many are due on the next three due days.
+  The folders show the next due day with its number of words.
 - An empty answer counts as wrong. Answers are saved in the background (no offline practice yet).
 - A word can be deactivated per direction (back to phase 0, progress in that direction is lost).
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDue } from '../lib/format'
-import { isActive, isDue } from '../lib/srs'
+import { isActive, isDue, upcoming } from '../lib/srs'
 import { useData } from '../state/data'
 import { FOLDERS } from '../types'
 
@@ -18,14 +18,14 @@ export function LearnHome() {
           const active = own.filter(isActive)
           const due = active.filter((c) => isDue(c, now)).length
           const learned = own.filter((c) => c.learned_at).length
-          const next = active.map((c) => c.due_at).sort()[0]
+          const next = upcoming(active, now, 1)[0]
 
           const body = (
             <>
               <span className="folder-label">{f.label}</span>
               <span className={due ? 'folder-due' : 'folder-due none'}>{due}</span>
               <span className="folder-meta">
-                {due ? 'due now' : next ? `next ${formatDue(next, now)}` : 'nothing active yet'}
+                {due ? 'due now' : next ? `next: ${next.count} ${formatDue(next.day, now)}` : 'nothing active yet'}
                 {' · '}{active.length} active · {learned} learned
               </span>
             </>

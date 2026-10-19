@@ -49,3 +49,24 @@ export function nextState(
   const newPhase = result === 'reset' ? 1 : Math.max(1, phase - 1)
   return { phase: newPhase, due_at: dueAfter(intervals[newPhase - 1], now), learned_at: null }
 }
+
+/** Never answered since it was (re)activated: the session first shows its full card (guided tour). */
+export function needsIntro(card: Card): boolean {
+  return card.last_reviewed_at === null || new Date(card.last_reviewed_at) < new Date(card.activated_at)
+}
+
+/** The first answer right after the tour proves little: the word stays in phase 1 and is asked again tomorrow. */
+export function introducedState(settings: Settings, now = new Date()): Pick<Card, 'phase' | 'due_at' | 'learned_at'> {
+  return { phase: 1, due_at: dueAfter(settings.phase_intervals[0], now), learned_at: null }
+}
+
+/** Active cards due later, grouped by calendar day, soonest first. */
+export function upcoming(cards: Card[], now = new Date(), days = 3): { day: string; count: number }[] {
+  const byDay = new Map<string, number>()
+  for (const c of cards) {
+    if (!isActive(c) || isDue(c, now)) continue
+    const day = startOfToday(new Date(c.due_at)).toISOString()
+    byDay.set(day, (byDay.get(day) ?? 0) + 1)
+  }
+  return [...byDay].sort(([a], [b]) => a.localeCompare(b)).slice(0, days).map(([day, count]) => ({ day, count }))
+}

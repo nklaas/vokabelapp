@@ -352,7 +352,14 @@ a.folder:active { transform: scale(0.98); }
   .btn.choice { flex: 1; justify-content: center; }
 }
 
+.intro { display: flex; flex-direction: column; gap: 16px; }
+
 .session-done { text-align: center; padding-top: 15vh; }
+.up-next { max-width: 280px; margin: 0 auto 24px; }
+.up-next h2 { font-size: 1rem; margin: 24px 0 8px; }
+.up-next ul { list-style: none; margin: 0; padding: 0; }
+.up-next li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--border); }
+.up-next li span { color: var(--muted); }
 
 /* ---------- Pool ---------- */
 
