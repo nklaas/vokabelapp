@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { WordDetail } from '../components/WordDetail'
-import { checkAnswer, diff, type CheckResult, type DiffChar } from '../lib/answer'
+import { checkAnswer, marks, type CheckResult, type DiffChar } from '../lib/answer'
 import { saveReview } from '../lib/db'
 import { formatDue, formatTranslation, LANGUAGE_NAME } from '../lib/format'
-import { introducedState, isDue, needsIntro, nextState, upcoming } from '../lib/srs'
+import { introducedState, isActive, isDue, needsIntro, nextState, startOfToday, upcoming } from '../lib/srs'
+import { loadJson, removePref, saveJson } from '../lib/storage'
 import { errorMessage, useData } from '../state/data'
 import { FOLDERS, type Card, type Direction, type Language, type ReviewResult } from '../types'
 
@@ -16,6 +17,16 @@ interface Item {
   fresh: boolean
   /** A word answered wrongly earlier in this session; repeating it no longer changes the phase. */
   retry: boolean
+  /** A new word introduced in this session: when wrong, it is repeated before the next batch of new words. */
+  tour: boolean
+}
+
+/** An unfinished session, kept on this device so closing the app mid-session loses nothing. */
+interface SavedSession {
+  day: string
+  queue: Item[]
+  total: number
+  stats: { right: number; wrong: number }
 }
 
 interface Feedback {
@@ -40,7 +51,7 @@ function shuffle<T>(items: T[]): T[] {
 
 /** Tour of 5 new words, then those 5 mixed with a share of the known words, then the next 5, … */
 function buildQueue(picked: Card[]): Item[] {
-  const ask = (c: Card, fresh: boolean): Item => ({ cardId: c.id, kind: 'ask', fresh, retry: false })
+  const ask = (c: Card, fresh: boolean): Item => ({ cardId: c.id, kind: 'ask', fresh, retry: false, tour: fresh })
   const fresh = picked.filter(needsIntro)
   const known = picked.filter((c) => !needsIntro(c))
   if (fresh.length === 0) return known.map((c) => ask(c, false))
@@ -51,10 +62,23 @@ function buildQueue(picked: Card[]): Item[] {
   for (let b = 0; b < batches; b++) {
     const batch = fresh.slice(b * TOUR_BATCH, (b + 1) * TOUR_BATCH)
     const others = known.slice(b * share, (b + 1) * share)
-    queue.push(...batch.map((c): Item => ({ cardId: c.id, kind: 'intro', fresh: true, retry: false })))
+    queue.push(...batch.map((c): Item => ({ cardId: c.id, kind: 'intro', fresh: true, retry: false, tour: true })))
     queue.push(...shuffle([...batch.map((c) => ask(c, true)), ...others.map((c) => ask(c, false))]))
   }
   return queue
+}
+
+/** Continues today's unfinished session, without the words that were meanwhile answered elsewhere. */
+function resume(saved: SavedSession | null, cards: Card[], now: Date): SavedSession | null {
+  if (!saved || saved.day !== startOfToday(now).toISOString()) return null
+  const byId = new Map(cards.map((c) => [c.id, c]))
+  const queue = saved.queue.filter((i) => {
+    const c = byId.get(i.cardId)
+    if (!c || !isActive(c)) return false
+    if (i.retry) return true
+    return i.tour ? needsIntro(c) : isDue(c, now)
+  })
+  return queue.length ? { ...saved, queue } : null
 }
 
 export function Session() {
@@ -62,21 +86,28 @@ export function Session() {
   const language = params.language as Language
   const direction = params.direction as Direction
   const folder = FOLDERS.find((f) => f.language === language && f.direction === direction)
-  const { cards, vocabById, settings, putCards, toast } = useData()
+  const { userId, cards, vocabById, settings, putCards, toast } = useData()
   const navigate = useNavigate()
 
   // The session is fixed when it starts: due cards of this folder, shuffled, capped.
+  // An unfinished session from earlier today is continued instead.
+  const storageKey = `session.${userId}.${language}.${direction}`
   const [now] = useState(() => new Date())
-  const [queue, setQueue] = useState<Item[]>(() => {
+  const [start] = useState<SavedSession>(() => {
+    const saved = resume(loadJson<SavedSession>(storageKey), cards, now)
+    if (saved) return saved
     const due = cards.filter(
       (c) => c.direction === direction && isDue(c, now) && vocabById.get(c.vocab_id)?.language === language,
     )
-    return buildQueue(shuffle(due).slice(0, settings.session_size))
+    const queue = buildQueue(shuffle(due).slice(0, settings.session_size))
+    const total = new Set(queue.map((i) => i.cardId)).size
+    return { day: startOfToday(now).toISOString(), queue, total, stats: { right: 0, wrong: 0 } }
   })
-  const [total] = useState(() => new Set(queue.map((i) => i.cardId)).size)
+  const [queue, setQueue] = useState<Item[]>(start.queue)
+  const total = start.total
   const [typed, setTyped] = useState('')
   const [feedback, setFeedback] = useState<Feedback | null>(null)
-  const [stats, setStats] = useState({ right: 0, wrong: 0 })
+  const [stats, setStats] = useState(start.stats)
   const [flash, setFlash] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -86,10 +117,30 @@ export function Session() {
   // Progress counts finished words: a wrong word stays open until it is answered correctly.
   const done = total - new Set(queue.map((i) => i.cardId)).size
 
+  useEffect(() => {
+    if (queue.length) saveJson(storageKey, { day: start.day, queue, total, stats } satisfies SavedSession)
+    else removePref(storageKey)
+  }, [storageKey, start.day, queue, total, stats])
+
+  // iPhone: with the keyboard open the page can be dragged until the question is out of sight.
+  // While a question waits for its answer there is nothing to scroll, so the page is held in place.
+  const asking = current?.kind === 'ask' && !feedback
+  useEffect(() => {
+    if (!asking) return
+    window.scrollTo(0, 0)
+    const hold = (e: TouchEvent) => e.preventDefault()
+    document.addEventListener('touchmove', hold, { passive: false })
+    return () => document.removeEventListener('touchmove', hold)
+  }, [asking, current])
+
   function advance(requeue: boolean) {
-    setQueue(([head, ...rest]) =>
-      requeue ? [...rest, { cardId: head.cardId, kind: 'ask', fresh: false, retry: true }] : rest,
-    )
+    setQueue(([head, ...rest]) => {
+      if (!requeue) return rest
+      const again: Item = { ...head, kind: 'ask', fresh: false, retry: true }
+      // A wrong new word comes back before the next batch of new words; other wrong words at the end.
+      const nextBatch = head.tour ? rest.findIndex((i) => i.kind === 'intro') : -1
+      return nextBatch < 0 ? [...rest, again] : [...rest.slice(0, nextBatch), again, ...rest.slice(nextBatch)]
+    })
     setTyped('')
     setFeedback(null)
     inputRef.current?.focus() // inside the tap/keypress, so the iPhone keyboard stays open
@@ -285,9 +336,14 @@ export function Session() {
               ) : (
                 <div className="diff">
                   {feedback.typed.trim() && (
-                    <p><span className="muted">Your answer</span> <Chars chars={diff(feedback.typed, feedback.check.expected).typed} kind="extra" /></p>
+                    <p><span className="muted">Your answer</span> <span className="chars">{feedback.typed.trim()}</span></p>
                   )}
-                  <p><span className="muted">Correct</span> <Chars chars={diff(feedback.typed, feedback.check.expected).expected} kind="missing" /></p>
+                  <p>
+                    <span className="muted">Correct</span>{' '}
+                    {feedback.check.close
+                      ? <Marked chars={marks(feedback.typed, feedback.check.expected, vocab, direction)} />
+                      : <span className="chars correct">{feedback.check.expected}</span>}
+                  </p>
                 </div>
               )}
               {feedback.check.alternatives.length > 0 && (
@@ -314,10 +370,11 @@ export function Session() {
   )
 }
 
-function Chars({ chars, kind }: { chars: DiffChar[]; kind: 'extra' | 'missing' }) {
+/** The correct answer of a near miss, underlined where the typed answer differs. */
+function Marked({ chars }: { chars: DiffChar[] }) {
   return (
-    <span className="chars">
-      {chars.map((c, i) => <span key={i} className={c.ok ? '' : kind}>{c.ch}</span>)}
+    <span className="chars correct">
+      {chars.map((c, i) => <span key={i} className={c.ok ? '' : 'mark'}>{c.ch}</span>)}
     </span>
   )
 }

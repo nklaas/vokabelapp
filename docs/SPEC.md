@@ -41,8 +41,9 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 - Four folders: DE→EN, EN→DE, DE→ES, ES→DE, each showing how many words are due.
 - The answer is typed.
 - Exactly correct → next word immediately.
-- Otherwise (typo, missing accent, wrong word) → show the correct answer with differences highlighted plus the full entry,
-  and offer three choices: **count as correct / drop one phase / back to phase 1**.
+- Otherwise (typo, missing accent, wrong word) → show the typed answer (plain) and the correct answer plus the full entry.
+  For a near miss (up to one wrong letter in four) the correct answer is underlined where it differs (a mostly wrong
+  word as a whole; optional parts like the German article never); a different word gets no marks. Then offer three choices: **count as correct / drop one phase / back to phase 1**.
 - Correct but other translations exist → show them and offer the same three choices (setting `confirm_alternatives`,
   on by default).
 - Any listed translation (or synonym) counts as a valid answer.
@@ -54,10 +55,13 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
   (question and solution, "Got it"). New words come in batches of 5: the 5 cards, then their questions mixed with
   regular due words, then the next 5. The answer right after the tour does not move the word forward: it stays in
   phase 1 and is due again tomorrow (interval 1). A wrong answer there offers: count as correct / repeat again.
+  A wrongly answered new word is repeated until correct before the next 5 new words start.
 - The progress bar counts finished words: a wrongly answered word only counts once it is answered correctly.
 - The end of a session shows how many words are still due now and how many are due on the next three due days.
   The folders show the next due day with its number of words.
 - An empty answer counts as wrong. Answers are saved in the background (no offline practice yet).
+- An unfinished session (app closed or left with ✕) is kept on the device and continued when the folder is opened
+  again the same day: same progress bar, same words still to repeat. It is dropped at midnight.
 - A word can be deactivated per direction (back to phase 0, progress in that direction is lost).
 
 ## Phases

@@ -16,3 +16,24 @@ export function savePref(key: string, value: string): void {
     // private mode or blocked storage: the preference just isn't remembered
   }
 }
+
+export function loadJson<T>(key: string): T | null {
+  try {
+    const value = localStorage.getItem(`vokabelapp.${key}`)
+    return value ? (JSON.parse(value) as T) : null
+  } catch {
+    return null
+  }
+}
+
+export function saveJson(key: string, value: unknown): void {
+  savePref(key, JSON.stringify(value))
+}
+
+export function removePref(key: string): void {
+  try {
+    localStorage.removeItem(`vokabelapp.${key}`)
+  } catch {
+    // nothing stored, nothing to remove
+  }
+}

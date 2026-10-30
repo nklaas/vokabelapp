@@ -336,9 +336,9 @@ a.folder:active { transform: scale(0.98); }
 .feedback { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
 .diff p { margin: 0 0 4px; display: flex; gap: 10px; align-items: baseline; }
 .diff .muted { width: 92px; flex-shrink: 0; font-size: 0.85rem; }
-.chars { font-size: 1.2rem; font-weight: 500; }
-.chars .extra { color: var(--bad); text-decoration: line-through; }
-.chars .missing { color: var(--good); background: var(--good-soft); border-radius: 3px; }
+.chars { font-size: 1.2rem; font-weight: 500; white-space: pre-wrap; }
+.chars.correct { font-weight: 650; }
+.chars .mark { box-shadow: inset 0 -3px 0 var(--warn); } /* also visible under a missing space */
 .alternatives { margin: 0; }
 
 .choices { display: flex; flex-direction: column; gap: 8px; }
