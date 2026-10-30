@@ -78,7 +78,7 @@ A word may set its own `"cluster"` to override the file's cluster.
 | `ipa` | English, always | **American** pronunciation, slashes and stress marks: `/rɪˈlɪŋkwɪʃ/`. Never for Spanish. |
 | `region` | only if regional | Where the word is (mainly) used: `"Spain"`, `"Latin America"`, `"Mexico"`, `"Argentina"`, `"US"`. Leave out for words used everywhere. English uses American spelling. |
 | `synonyms` | if obvious | Close synonyms in the target language, written like `term`. They are accepted as answers. |
-| `also_correct` | always consider | Other words of the target language a learner could rightly type for the German prompt, but which are not the word to learn (*controversial* for *contentious*, *supposedly* for *allegedly*). Typing one shows the target instead of counting as wrong. Written like `term` (Spanish nouns with article, English verbs with "to"). Only real equivalents in the sense of the translations; never the term or a synonym. |
+| `also_correct` | always consider | Other words of the target language a learner could rightly type for the German prompt, but which are not the word to learn (*controversial* for *contentious*, *supposedly* for *allegedly*). Typing one shows the target instead of counting as wrong. Written like `term` (Spanish nouns with article, English verbs with "to"). Only real equivalents in the sense of the translations; never the term or a synonym. Only common, standard words, and only **below the level of the term** (C2 word: up to C1; C1 word: up to B2; B2 word: up to B1) – no rare or fancy words. Empty is fine. |
 | `example` / `example_de` | recommended | One natural, idiomatic sentence showing typical use (collocations!), plus a natural German translation. |
 | `notes` | optional | Short usage hints in English: false friends, prepositions (`perjudicial para`), register, gender traps (`el ecosistema` is masculine). |
 | `tags` | optional | Free labels, e.g. `"false friend"`. |
@@ -102,7 +102,8 @@ never skip this or do it superficially. For each entry check:
   (numbers, dates, events) unless they are certainly true – prefer neutral sentences.
 - **Duplicates** with existing pool words (check step 1) and within the file.
 - **Also correct:** for the German prompt (all translations together), which other words would a good speaker
-  rightly answer? List them. Each must fit the meaning; leave out words that are only loosely related.
+  rightly answer? List them. Each must fit the meaning and be a common word below the term's level; leave out
+  words that are only loosely related, rare or at the same level or higher.
 
 If anything is uncertain (a rare form, a disputed gender, regional usage), say so in the review message and ask the
 user instead of guessing.
