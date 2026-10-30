@@ -67,6 +67,7 @@ async function row(w: WordIn) {
     forms: w.forms ?? null,
     region: w.region ?? null,
     synonyms: w.synonyms ?? [],
+    also_correct: w.also_correct ?? [],
     example: w.example ?? null,
     example_de: w.example_de ?? null,
     notes: w.notes ?? null,

@@ -13,6 +13,7 @@ export interface WordIn {
   forms?: Record<string, string>
   region?: string
   synonyms?: string[]
+  also_correct?: string[]
   example?: string
   example_de?: string
   notes?: string
@@ -61,6 +62,9 @@ export function validate(file: VocabFile): string[] {
       if (w.gender) bad('English words get no gender')
       if (w.word_type === 'verb' && !w.term.startsWith('to ')) bad('English verbs are written with "to"')
     }
+
+    const accepted = [w.term, ...(w.synonyms ?? [])].map((s) => s?.toLowerCase())
+    if ((w.also_correct ?? []).some((a) => accepted.includes(a.toLowerCase()))) bad('also_correct repeats the term or a synonym')
 
     const key = `${w.term?.toLowerCase()}|${w.word_type}`
     if (seen.has(key)) bad('appears twice in this file')

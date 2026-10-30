@@ -341,6 +341,18 @@ a.folder:active { transform: scale(0.98); }
 .chars .mark { box-shadow: inset 0 -3px 0 var(--warn); } /* also visible under a missing space */
 .alternatives { margin: 0; }
 
+.also-correct {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--good-soft);
+  border-radius: var(--radius);
+}
+.also-correct p { margin: 0; }
+
 .choices { display: flex; flex-direction: column; gap: 8px; }
 .btn.choice { text-align: left; display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
 .btn.choice.good { background: var(--good-soft); border-color: var(--good); color: var(--good); }

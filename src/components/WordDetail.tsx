@@ -38,6 +38,7 @@ export function WordDetail({ vocab }: { vocab: Vocab }) {
           <Fragment key={label}><dt>{label}</dt><dd>{value}</dd></Fragment>
         ))}
         {vocab.synonyms.length > 0 && <><dt>Synonyms</dt><dd>{vocab.synonyms.join(', ')}</dd></>}
+        {vocab.also_correct?.length > 0 && <><dt>Similar</dt><dd>{vocab.also_correct.join(', ')}</dd></>}
       </dl>
 
       {vocab.example && (

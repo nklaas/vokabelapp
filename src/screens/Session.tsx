@@ -107,6 +107,8 @@ export function Session() {
   const total = start.total
   const [typed, setTyped] = useState('')
   const [feedback, setFeedback] = useState<Feedback | null>(null)
+  // An "also correct" word was typed: the target is shown and typed once, without a phase change.
+  const [hint, setHint] = useState<{ target: string; missed: boolean } | null>(null)
   const [stats, setStats] = useState(start.stats)
   const [flash, setFlash] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -133,16 +135,19 @@ export function Session() {
     return () => document.removeEventListener('touchmove', hold)
   }, [asking, current])
 
-  function advance(requeue: boolean) {
+  /** 'retry': answered wrongly, comes back without changing the phase. 'later': asked again, unchanged, at the end. */
+  function advance(again?: 'retry' | 'later') {
     setQueue(([head, ...rest]) => {
-      if (!requeue) return rest
-      const again: Item = { ...head, kind: 'ask', fresh: false, retry: true }
+      if (!again) return rest
+      if (again === 'later') return [...rest, head]
+      const retry: Item = { ...head, kind: 'ask', fresh: false, retry: true }
       // A wrong new word comes back before the next batch of new words; other wrong words at the end.
       const nextBatch = head.tour ? rest.findIndex((i) => i.kind === 'intro') : -1
-      return nextBatch < 0 ? [...rest, again] : [...rest.slice(0, nextBatch), again, ...rest.slice(nextBatch)]
+      return nextBatch < 0 ? [...rest, retry] : [...rest.slice(0, nextBatch), retry, ...rest.slice(nextBatch)]
     })
     setTyped('')
     setFeedback(null)
+    setHint(null)
     inputRef.current?.focus() // inside the tap/keypress, so the iPhone keyboard stays open
   }
 
@@ -155,7 +160,7 @@ export function Session() {
     )
     const wrong = result === 'down_one' || result === 'reset'
     setStats((s) => (wrong ? { ...s, wrong: s.wrong + 1 } : { ...s, right: s.right + 1 }))
-    advance(wrong)
+    advance(wrong ? 'retry' : undefined)
   }
 
   function submit(e: FormEvent) {
@@ -163,8 +168,18 @@ export function Session() {
     if (!card || !vocab || feedback || current.kind === 'intro') return
     const check = checkAnswer(typed, vocab, direction)
 
+    if (hint) {
+      if (check.exact) advance('later')
+      else setHint({ ...hint, missed: true })
+      return
+    }
+    if (check.alsoCorrect) {
+      setHint({ target: check.expected, missed: false })
+      setTyped('')
+      return
+    }
     if (current.retry) {
-      if (check.exact) advance(false)
+      if (check.exact) advance()
       else setFeedback({ check, typed, mode: 'retry-wrong' })
       return
     }
@@ -189,8 +204,8 @@ export function Session() {
             ]
         : feedback.mode === 'retry-wrong'
           ? [
-              { label: 'Count as correct', kind: 'good', run: () => advance(false) },
-              { label: 'Repeat again', kind: 'bad', run: () => advance(true) },
+              { label: 'Count as correct', kind: 'good', run: () => advance() },
+              { label: 'Repeat again', kind: 'bad', run: () => advance('retry') },
             ]
           : [
               {
@@ -209,7 +224,7 @@ export function Session() {
     const onKey = (e: KeyboardEvent) => {
       if (isIntro && (e.key === 'Enter' || e.key === '1')) {
         e.preventDefault()
-        advance(false)
+        advance()
         return
       }
       const choice = choices[Number(e.key) - 1]
@@ -265,7 +280,7 @@ export function Session() {
     )
   }
 
-  const hint =
+  const placeholder =
     direction === 'to_german'
       ? 'Deutsch'
       : `${LANGUAGE_NAME[language]}${language === 'es' && vocab.word_type === 'noun' ? ' (with article)' : ''}`
@@ -299,17 +314,17 @@ export function Session() {
       {current.kind === 'intro' ? (
         <div className="intro">
           <WordDetail vocab={vocab} />
-          <button className="btn primary" onClick={() => advance(false)}>Got it</button>
+          <button className="btn primary" onClick={() => advance()}>Got it</button>
         </div>
       ) : (
         <>
           <form onSubmit={submit} className="answer-form">
             <input
               ref={inputRef}
-              className={`answer ${feedback ? (feedback.check.exact ? 'is-right' : 'is-wrong') : ''}`}
+              className={`answer ${feedback ? (feedback.check.exact ? 'is-right' : 'is-wrong') : hint?.missed ? 'is-wrong' : ''}`}
               value={typed}
               onChange={(e) => !feedback && setTyped(e.target.value)}
-              placeholder={hint}
+              placeholder={hint ? 'Type it once' : placeholder}
               autoFocus
               autoCapitalize="off"
               autoCorrect="off"
@@ -319,6 +334,13 @@ export function Session() {
             />
             {!feedback && <button className="btn primary">Check</button>}
           </form>
+
+          {hint && (
+            <div className="also-correct">
+              <p><strong className="good-text">✓ Also right</strong>, but the word we're looking for is <strong>{hint.target}</strong>.</p>
+              <button type="button" className="btn ghost small" onClick={() => advance('later')}>Skip</button>
+            </div>
+          )}
 
           {language === 'es' && direction === 'to_foreign' && !feedback && (
             <div className="char-keys">

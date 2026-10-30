@@ -39,6 +39,8 @@ export interface Vocab {
   forms: Record<string, string> | null
   region: string | null
   synonyms: string[]
+  /** Same meaning, but not the word being learned: typing one shows the target instead of counting as wrong. */
+  also_correct: string[]
   example: string | null
   example_de: string | null
   notes: string | null

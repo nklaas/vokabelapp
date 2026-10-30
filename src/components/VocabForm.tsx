@@ -41,6 +41,7 @@ export function VocabForm({ language, initial, onSaved }: {
   const [forms, setForms] = useState(formsToText(initial?.forms ?? null))
   const [region, setRegion] = useState(initial?.region ?? '')
   const [synonyms, setSynonyms] = useState(initial?.synonyms.join(', ') ?? '')
+  const [alsoCorrect, setAlsoCorrect] = useState(initial?.also_correct?.join(', ') ?? '')
   const [example, setExample] = useState(initial?.example ?? '')
   const [exampleDe, setExampleDe] = useState(initial?.example_de ?? '')
   const [notes, setNotes] = useState(initial?.notes ?? '')
@@ -87,6 +88,7 @@ export function VocabForm({ language, initial, onSaved }: {
       forms: textToForms(forms),
       region: orNull(region),
       synonyms: list(synonyms),
+      also_correct: list(alsoCorrect),
       example: orNull(example),
       example_de: orNull(exampleDe),
       notes: orNull(notes),
@@ -195,6 +197,10 @@ export function VocabForm({ language, initial, onSaved }: {
       <label>
         Synonyms (comma separated)
         <input value={synonyms} onChange={(e) => setSynonyms(e.target.value)} />
+      </label>
+      <label>
+        Also correct, but not the word to learn (comma separated)
+        <input value={alsoCorrect} onChange={(e) => setAlsoCorrect(e.target.value)} />
       </label>
       <label>
         Example sentence

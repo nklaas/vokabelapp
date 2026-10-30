@@ -60,6 +60,7 @@ create table vocab (
   forms        jsonb,                      -- irregular forms, e.g. {"presente": "tengo, tienes, ...", "indefinido": "tuve, ..."}
   region       text,                       -- only set when regional, e.g. "Spain", "Latin America", "Mexico"
   synonyms     text[] not null default '{}',
+  also_correct text[] not null default '{}',  -- same meaning but not the word being learned: no penalty, the target is shown
   example      text,                       -- example sentence in the foreign language
   example_de   text,                       -- its German translation
   notes        text,                       -- shared usage notes (personal notes live in vocab_notes)

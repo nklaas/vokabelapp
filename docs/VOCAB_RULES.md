@@ -10,7 +10,8 @@ officially B2 in both languages, with English clearly stronger (see target level
 3. **Show the user a compact review table** (term · type · level · translations) and point out anything noteworthy
    (irregular forms, regional words, false friends). Never import without the user's approval.
 4. **Dry run, then import:** `npm run import -- <file> --dry-run`, then without `--dry-run`. Report the summary.
-5. To correct words that are already in the pool, import a file with the corrected entries using `--update`.
+5. To correct words that are already in the pool, import a file with the corrected entries using `--update`, or
+   change single fields only with `npm run patch -- <file>` (term + the fields to change, see `scripts/patch.ts`).
 
 ### Completing drafts (quick adds from the phone)
 
@@ -77,6 +78,7 @@ A word may set its own `"cluster"` to override the file's cluster.
 | `ipa` | English, always | **American** pronunciation, slashes and stress marks: `/rɪˈlɪŋkwɪʃ/`. Never for Spanish. |
 | `region` | only if regional | Where the word is (mainly) used: `"Spain"`, `"Latin America"`, `"Mexico"`, `"Argentina"`, `"US"`. Leave out for words used everywhere. English uses American spelling. |
 | `synonyms` | if obvious | Close synonyms in the target language, written like `term`. They are accepted as answers. |
+| `also_correct` | always consider | Other words of the target language a learner could rightly type for the German prompt, but which are not the word to learn (*controversial* for *contentious*, *supposedly* for *allegedly*). Typing one shows the target instead of counting as wrong. Written like `term` (Spanish nouns with article, English verbs with "to"). Only real equivalents in the sense of the translations; never the term or a synonym. |
 | `example` / `example_de` | recommended | One natural, idiomatic sentence showing typical use (collocations!), plus a natural German translation. |
 | `notes` | optional | Short usage hints in English: false friends, prepositions (`perjudicial para`), register, gender traps (`el ecosistema` is masculine). |
 | `tags` | optional | Free labels, e.g. `"false friend"`. |
@@ -99,6 +101,8 @@ never skip this or do it superficially. For each entry check:
   first translation; the German translation is accurate and natural. **No factual claims that could be wrong**
   (numbers, dates, events) unless they are certainly true – prefer neutral sentences.
 - **Duplicates** with existing pool words (check step 1) and within the file.
+- **Also correct:** for the German prompt (all translations together), which other words would a good speaker
+  rightly answer? List them. Each must fit the meaning; leave out words that are only loosely related.
 
 If anything is uncertain (a rare form, a disputed gender, regional usage), say so in the review message and ask the
 user instead of guessing.

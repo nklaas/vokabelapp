@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "backup": "node --env-file=.env.local scripts/backup.ts",
     "import": "node --env-file=.env.local scripts/import.ts",
-    "pool": "node --env-file=.env.local scripts/pool-info.ts"
+    "pool": "node --env-file=.env.local scripts/pool-info.ts",
+    "patch": "node --env-file=.env.local scripts/patch.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

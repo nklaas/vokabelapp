@@ -47,6 +47,9 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 - Correct but other translations exist → show them and offer the same three choices (setting `confirm_alternatives`,
   on by default).
 - Any listed translation (or synonym) counts as a valid answer.
+- Each word can also list words with the same meaning that are not the word being learned ("also correct", e.g.
+  *controversial* for *contentious*). Typing one shows "Also right, but we're looking for: …"; the learner types the
+  target once (or skips), the phase does not change, and the word is asked again normally at the end of the session.
 - Spanish nouns: article required. English verbs and infinitive phrases: "to" optional. German nouns: article optional.
 - Wrongly answered words come back at the end of the session until answered correctly (does not change the phase again).
 - Session length is capped (setting, default 30); due words are shuffled.

@@ -1,5 +1,5 @@
 // Answer checking (see docs/SPEC.md, "Learning").
-// Case, surrounding punctuation and extra spaces never matter; accents always do.
+// Case, surrounding punctuation, hyphens and extra spaces never matter; accents always do.
 // Spanish nouns need their article, English verbs and infinitive phrases may omit "to",
 // German nouns may omit the article.
 import type { Direction, Vocab } from '../types'
@@ -12,6 +12,8 @@ export interface CheckResult {
   alternatives: string[]
   /** Wrong, but close to the expected answer (typo, accent, article): the differences are marked. */
   close: boolean
+  /** A word from the "also correct" list: right meaning, but not the word being learned (= expected). */
+  alsoCorrect: boolean
 }
 
 const GERMAN_ARTICLE = /^(der|die|das)\s+/
@@ -22,7 +24,7 @@ function normalize(s: string): string {
     .toLowerCase()
     .replace(/[’`]/g, "'")
     .replace(/\([^)]*\)/g, ' ') // "(etw.) aufgeben" -> "aufgeben"
-    .replace(/[.,;:!?¡¿"]/g, ' ')
+    .replace(/[.,;:!?¡¿"-]/g, ' ') // "falling-out" = "falling out"
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -55,7 +57,12 @@ export function checkAnswer(typed: string, vocab: Vocab, direction: Direction): 
 
   const matched = answers.find((a) => variants(a).some((v) => key(v, vocab, direction) === typedKey))
   if (matched !== undefined) {
-    return { exact: true, expected: matched, alternatives: answers.filter((a) => a !== matched), close: false }
+    return { exact: true, expected: matched, alternatives: answers.filter((a) => a !== matched), close: false, alsoCorrect: false }
+  }
+
+  const same = (a: string) => variants(a).some((v) => key(v, vocab, direction) === typedKey)
+  if (direction === 'to_foreign' && (vocab.also_correct ?? []).some(same)) {
+    return { exact: false, expected: vocab.term, alternatives: [], close: false, alsoCorrect: true }
   }
 
   let closest = answers[0] ?? ''
@@ -70,7 +77,7 @@ export function checkAnswer(typed: string, vocab: Vocab, direction: Direction): 
   }
   // Up to one wrong letter in four is a near miss; anything further off is a different word.
   const close = typedKey !== '' && best <= Math.max(1, Math.floor(length / 4))
-  return { exact: false, expected: closest, alternatives: answers.filter((a) => a !== closest), close }
+  return { exact: false, expected: closest, alternatives: answers.filter((a) => a !== closest), close, alsoCorrect: false }
 }
 
 function levenshtein(a: string, b: string): number {
