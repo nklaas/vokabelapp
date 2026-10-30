@@ -35,10 +35,14 @@ function key(s: string, vocab: Vocab, direction: Direction): string {
   return k
 }
 
-/** "el/la periodista" is accepted as "el periodista", "la periodista" and as written. */
+/**
+ * "el/la periodista" is accepted as "el periodista", "la periodista" and as written;
+ * "(vor Wut) kochen" as "kochen" and as "vor Wut kochen".
+ */
 function variants(answer: string): string[] {
   const m = answer.match(/^(el|la|los|las)\/(el|la|los|las)\s+(.+)$/i)
-  return m ? [answer, `${m[1]} ${m[3]}`, `${m[2]} ${m[3]}`] : [answer]
+  const forms = m ? [answer, `${m[1]} ${m[3]}`, `${m[2]} ${m[3]}`] : [answer]
+  return answer.includes('(') ? [...forms, ...forms.map((f) => f.replace(/[()]/g, ''))] : forms
 }
 
 export function validAnswers(vocab: Vocab, direction: Direction): string[] {
