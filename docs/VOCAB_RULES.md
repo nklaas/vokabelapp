@@ -25,6 +25,9 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
     (*workload*, *cover letter*). Favor sophisticated but genuinely used words: figurative phrasal verbs, idioms,
     words from quality journalism, literature and professional life.
   - **Spanish: B2–C1**, mostly C1 (the user's Spanish is a bit rusty). Skip basic words (*la casa*, *comprar*).
+  - **Easier words (B1–B2)** are added to every cluster as well (about 10 per cluster), so the pool also suits
+    friends at lower levels. Still useful, everyday words – not A1/A2 basics – and the same rules apply (no
+    cognates or anglicisms, full entries, verification pass).
 - **Use every word type that fits the topic**, not only nouns, verbs and adjectives. Every batch should also
   contain, where the topic offers them: adverbs (*nevertheless*, *a regañadientes*), prepositions and prepositional
   phrases (*notwithstanding*, *en aras de*), conjunctions and connectors (*whereas*, *puesto que*), discourse
@@ -39,7 +42,8 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
   The same applies to single translations: never list a cognate (*outsourcen*, *jonglieren*) next to the real German
   equivalents, because in German → foreign all translations are shown as the question and would give it away.
 - Group words into **clusters** = topics with English names ("Environment & Climate", "Work & Career").
-  Reuse an existing cluster when it fits; a cluster typically holds 20–40 words.
+  Always add to an existing cluster when the topic fits – clusters have no size limit and keep growing
+  (more academic words go into "Academic Writing"). Create a new cluster only for a new topic.
 
 ## File format
 
