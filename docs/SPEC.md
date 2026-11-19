@@ -31,19 +31,22 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
   - Phone: quick add (word only, flagged as draft, completed later by Claude Code) and a full manual form.
 
 ## Activation
-- Bulk activation from the pool: filter → select all / deselect some → activate in a chosen direction.
+- Bulk activation from the pool: filter → select all / deselect some → activate in a chosen direction. "Select all"
+  adds the words shown to the selection, so words picked under other filters stay selected.
 - A word can be active at most once per direction. Activating again shows which words are already active and in which
   phase, with the option to reset them to phase 1 or skip them.
 - Learned words can be reactivated (back to phase 1).
 - Activation is manual for now. Later idea: an agent that proposes new words for review and activation.
 
 ## Learning
-- Four folders: DE→EN, EN→DE, DE→ES, ES→DE, each showing how many words are due.
+- Four folders: DE→EN, EN→DE, DE→ES, ES→DE, each showing how many words are left today: the due words plus the
+  wrongly answered words of an unfinished session that still need repeating.
 - The answer is typed.
 - Exactly correct → next word immediately.
 - Otherwise (typo, missing accent, wrong word) → show the typed answer (plain) and the correct answer plus the full entry.
   For a near miss (up to one wrong letter in four) the correct answer is underlined where it differs (a mostly wrong
   word as a whole; optional parts like the German article never); a different word gets no marks. Then offer three choices: **count as correct / drop one phase / back to phase 1**.
+  The phone keyboard closes while the answer is shown and opens again for the next word.
 - Correct but other translations exist → show them and offer the same three choices (setting `confirm_alternatives`,
   on by default).
 - Any listed translation (or synonym) counts as a valid answer.
@@ -66,6 +69,9 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 - An unfinished session (app closed or left with ✕) is kept on the device and continued when the folder is opened
   again the same day: same progress bar, same words still to repeat. It is dropped at midnight.
 - A word can be deactivated per direction (back to phase 0, progress in that direction is lost).
+
+## Settings
+- Saved automatically shortly after each change (no save button); the display name when leaving its field.
 
 ## Phases
 - Number of phases and their intervals are adjustable. Defaults (days): 1, 3, 7, 14, 30, 90, 180, 365, 1095.

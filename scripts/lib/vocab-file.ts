@@ -66,9 +66,20 @@ export function validate(file: VocabFile): string[] {
     const accepted = [w.term, ...(w.synonyms ?? [])].map((s) => s?.toLowerCase())
     if ((w.also_correct ?? []).some((a) => accepted.includes(a.toLowerCase()))) bad('also_correct repeats the term or a synonym')
 
+    for (const c of revealingContexts(w.term ?? '', w.translations ?? [])) bad(`context "${c}" gives the word away (write hints in German, without the term)`)
+
     const key = `${w.term?.toLowerCase()}|${w.word_type}`
     if (seen.has(key)) bad('appears twice in this file')
     seen.add(key)
   }
   return problems
+}
+
+const FILLER = new Set(['to', 'sth', 'sb', 'el', 'la', 'los', 'las', 'un', 'una', 'se', 'the', 'a'])
+
+/** Context hints are shown with the German prompt, so none may contain the word being asked (e.g. "anxious to do sth."). */
+export function revealingContexts(term: string, translations: Translation[]): string[] {
+  const words = term.toLowerCase().split(/[\s()/]+/).map((w) => w.replace(/[.,;:!?¡¿…]/g, ''))
+    .filter((w) => w.length > 2 && !FILLER.has(w))
+  return translations.flatMap((t) => (t.context && words.some((w) => t.context!.toLowerCase().includes(w)) ? [t.context] : []))
 }

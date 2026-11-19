@@ -174,7 +174,15 @@ export function Pool() {
       <div className="list-head">
         <label className="check">
           <input type="checkbox" checked={allFilteredSelected}
-            onChange={() => setSelected(allFilteredSelected ? new Set() : new Set(filtered.map((v) => v.id)))} />
+            onChange={() => setSelected((s) => {
+              // Only the words shown change: a selection made under other filters is kept.
+              const next = new Set(s)
+              for (const v of filtered) {
+                if (allFilteredSelected) next.delete(v.id)
+                else next.add(v.id)
+              }
+              return next
+            })} />
           <span>{filtered.length} word{filtered.length === 1 ? '' : 's'}</span>
         </label>
       </div>

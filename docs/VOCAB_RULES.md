@@ -75,7 +75,7 @@ A word may set its own `"cluster"` to override the file's cluster.
 | `term` | always | Exactly what the learner must type. Spanish nouns **with article** (`la sequía`, `el/la ecologista` for common gender). English verbs **with "to"** (`to relinquish`). Lower case unless a proper noun. |
 | `word_type` | always | `noun`, `verb`, `adjective`, `adverb`, `preposition`, `conjunction`, `phrase`, `other` |
 | `level` | always | `B1`, `B2`, `C1`, `C2` (CEFR estimate) |
-| `translations` | always | German meanings, most common first. Nouns **with article** (`die Dürre`). One entry per distinct meaning, each a single answer the learner could type (no "a, b" lists in one entry). Add `context` (in German, short) whenever the meaning depends on context: `{ "de": "die Ausstrahlung", "context": "Radio, TV" }`. Optional parts in parentheses may be typed or left out: `(etw.) abtreten`. |
+| `translations` | always | German meanings, most common first. Nouns **with article** (`die Dürre`). One entry per distinct meaning, each a single answer the learner could type (no "a, b" lists in one entry). Add `context` (in German, short) whenever the meaning depends on context: `{ "de": "die Ausstrahlung", "context": "Radio, TV" }`. The context is shown with the German question, so it **never contains the term or an English/Spanish phrase with it** (not `"anxious to do sth."`, but `"darauf, etw. zu tun"`); the import and patch scripts reject such hints. Optional parts in parentheses may be typed or left out: `(etw.) abtreten`. |
 | `gender` | Spanish nouns | `m`, `f`, `m/f` |
 | `plural` | if noteworthy | Irregular or tricky plurals only: accent changes (`las emisiones`), z→c (`las escaseces`), compound nouns (`los combustibles fósiles`). |
 | `forms` | if irregular | Object of label → forms, labels in the target language. Spanish verbs: only the irregular tenses, e.g. `"presente": "me derrito, te derrites, …"`, `"indefinido": "…"`, spelling changes (`"indefinido (yo)": "mitigué"`). English: `"past": "…", "past participle": "…"`. |
@@ -98,7 +98,8 @@ never skip this or do it superficially. For each entry check:
 - **Every conjugated form** listed in `forms`, person by person; spelling changes (g→gu, c→qu, z→c) included.
 - **IPA** (English): American, correct stress mark, matches the word type (e.g. *record* noun vs. verb).
 - **Translations:** each is what a German would really say, fits the term in a real context, has the right German
-  article, and context hints separate meanings clearly. No translation that only loosely matches.
+  article, and context hints separate meanings clearly, are German and do not give the word away. No translation
+  that only loosely matches.
 - **Level:** a realistic CEFR estimate for how common and advanced the word is – not inflated, not deflated.
 - **Region:** only set when the word is clearly regional; never mark a word as regional on a hunch.
 - **Example sentence:** grammatical, idiomatic, natural for a native speaker, uses the word in the sense of the

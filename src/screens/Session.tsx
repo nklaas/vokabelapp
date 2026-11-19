@@ -4,30 +4,11 @@ import { WordDetail } from '../components/WordDetail'
 import { checkAnswer, marks, type CheckResult, type DiffChar } from '../lib/answer'
 import { saveReview } from '../lib/db'
 import { formatDue, formatTranslation, LANGUAGE_NAME } from '../lib/format'
-import { introducedState, isActive, isDue, needsIntro, nextState, startOfToday, upcoming } from '../lib/srs'
-import { loadJson, removePref, saveJson } from '../lib/storage'
+import { resumeSession, sessionKey, type Item, type SavedSession } from '../lib/session'
+import { introducedState, isDue, needsIntro, nextState, startOfToday, upcoming } from '../lib/srs'
+import { removePref, saveJson } from '../lib/storage'
 import { errorMessage, useData } from '../state/data'
 import { FOLDERS, type Card, type Direction, type Language, type ReviewResult } from '../types'
-
-interface Item {
-  cardId: string
-  /** 'intro' shows the full card of a new word (guided tour), 'ask' asks for the answer. */
-  kind: 'intro' | 'ask'
-  /** Asked right after its intro: the word stays in phase 1 and comes back tomorrow. */
-  fresh: boolean
-  /** A word answered wrongly earlier in this session; repeating it no longer changes the phase. */
-  retry: boolean
-  /** A new word introduced in this session: when wrong, it is repeated before the next batch of new words. */
-  tour: boolean
-}
-
-/** An unfinished session, kept on this device so closing the app mid-session loses nothing. */
-interface SavedSession {
-  day: string
-  queue: Item[]
-  total: number
-  stats: { right: number; wrong: number }
-}
 
 interface Feedback {
   check: CheckResult
@@ -68,19 +49,6 @@ function buildQueue(picked: Card[]): Item[] {
   return queue
 }
 
-/** Continues today's unfinished session, without the words that were meanwhile answered elsewhere. */
-function resume(saved: SavedSession | null, cards: Card[], now: Date): SavedSession | null {
-  if (!saved || saved.day !== startOfToday(now).toISOString()) return null
-  const byId = new Map(cards.map((c) => [c.id, c]))
-  const queue = saved.queue.filter((i) => {
-    const c = byId.get(i.cardId)
-    if (!c || !isActive(c)) return false
-    if (i.retry) return true
-    return i.tour ? needsIntro(c) : isDue(c, now)
-  })
-  return queue.length ? { ...saved, queue } : null
-}
-
 export function Session() {
   const params = useParams()
   const language = params.language as Language
@@ -91,10 +59,10 @@ export function Session() {
 
   // The session is fixed when it starts: due cards of this folder, shuffled, capped.
   // An unfinished session from earlier today is continued instead.
-  const storageKey = `session.${userId}.${language}.${direction}`
+  const storageKey = sessionKey(userId, language, direction)
   const [now] = useState(() => new Date())
   const [start] = useState<SavedSession>(() => {
-    const saved = resume(loadJson<SavedSession>(storageKey), cards, now)
+    const saved = resumeSession(storageKey, cards, now)
     if (saved) return saved
     const due = cards.filter(
       (c) => c.direction === direction && isDue(c, now) && vocabById.get(c.vocab_id)?.language === language,
@@ -125,14 +93,37 @@ export function Session() {
   }, [storageKey, start.day, queue, total, stats])
 
   // iPhone: with the keyboard open the page can be dragged until the question is out of sight.
-  // While a question waits for its answer there is nothing to scroll, so the page is held in place.
+  // While a question waits for its answer there is nothing to scroll, so the page is held at the top.
+  // The keyboard slides in (and the app comes back from the background) after this runs and can shift the
+  // page on its own, so every such shift is undone again instead of only once at the start.
   const asking = current?.kind === 'ask' && !feedback
   useEffect(() => {
     if (!asking) return
-    window.scrollTo(0, 0)
+    let frame = 0
+    const pin = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        if (window.scrollY !== 0 || (window.visualViewport?.offsetTop ?? 0) !== 0) window.scrollTo(0, 0)
+      })
+    }
     const hold = (e: TouchEvent) => e.preventDefault()
+    const viewport = window.visualViewport
+    pin()
     document.addEventListener('touchmove', hold, { passive: false })
-    return () => document.removeEventListener('touchmove', hold)
+    window.addEventListener('scroll', pin)
+    viewport?.addEventListener('resize', pin)
+    viewport?.addEventListener('scroll', pin)
+    document.addEventListener('visibilitychange', pin)
+    window.addEventListener('pageshow', pin)
+    return () => {
+      cancelAnimationFrame(frame)
+      document.removeEventListener('touchmove', hold)
+      window.removeEventListener('scroll', pin)
+      viewport?.removeEventListener('resize', pin)
+      viewport?.removeEventListener('scroll', pin)
+      document.removeEventListener('visibilitychange', pin)
+      window.removeEventListener('pageshow', pin)
+    }
   }, [asking, current])
 
   /** 'retry': answered wrongly, comes back without changing the phase. 'later': asked again, unchanged, at the end. */
@@ -180,7 +171,7 @@ export function Session() {
     }
     if (current.retry) {
       if (check.exact) advance()
-      else setFeedback({ check, typed, mode: 'retry-wrong' })
+      else showFeedback({ check, typed, mode: 'retry-wrong' })
       return
     }
     if (check.exact && !(settings.confirm_alternatives && check.alternatives.length > 0)) {
@@ -188,8 +179,14 @@ export function Session() {
       window.setTimeout(() => setFlash(false), 600)
       record(card, 'correct', typed)
     } else {
-      setFeedback({ check, typed, mode: check.exact ? 'alternatives' : 'wrong' })
+      showFeedback({ check, typed, mode: check.exact ? 'alternatives' : 'wrong' })
     }
+  }
+
+  /** The keyboard goes away so the choices are fully visible; picking one brings it back for the next word. */
+  function showFeedback(f: Feedback) {
+    setFeedback(f)
+    inputRef.current?.blur()
   }
 
   const choices: { label: string; run: () => void; kind: string }[] =

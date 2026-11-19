@@ -5,6 +5,8 @@
 // Each word is found by its term (and word_type, if given); only the other fields listed are written.
 import { readFileSync } from 'node:fs'
 import { connectAsUser } from './lib/client.ts'
+import { revealingContexts } from './lib/vocab-file.ts'
+import type { Translation } from '../src/types.ts'
 
 const FIELDS = ['translations', 'ipa', 'gender', 'plural', 'forms', 'region', 'synonyms', 'also_correct',
   'example', 'example_de', 'notes', 'level', 'tags']
@@ -31,7 +33,11 @@ for (const { term, word_type, ...rest } of file.words) {
     (v) => v.term.toLowerCase() === term.toLowerCase() && (!word_type || v.word_type === word_type),
   )
   const unknown = Object.keys(rest).filter((k) => !FIELDS.includes(k))
-  if (matches.length !== 1 || unknown.length || !Object.keys(rest).length) {
+  const revealing = Array.isArray(rest.translations) ? revealingContexts(term, rest.translations as Translation[]) : []
+  if (revealing.length) {
+    console.error(`! ${term}: context ${revealing.map((c) => `"${c}"`).join(', ')} gives the word away (write hints in German, without the term)`)
+    problems++
+  } else if (matches.length !== 1 || unknown.length || !Object.keys(rest).length) {
     console.error(`! ${term}: ${matches.length !== 1 ? `${matches.length} matching words` : unknown.length ? `unknown field ${unknown.join(', ')}` : 'nothing to change'}`)
     problems++
   } else {
