@@ -1,5 +1,5 @@
 // Format and validation of vocab import files (see docs/VOCAB_RULES.md).
-import type { Language, Translation, WordType } from '../../src/types.ts'
+import { AREAS, type Language, type Translation, type WordType } from '../../src/types.ts'
 
 export interface WordIn {
   term: string
@@ -24,6 +24,8 @@ export interface VocabFile {
   language: Language
   cluster?: string
   cluster_description?: string
+  /** Area of the file's cluster; required when that cluster is new (see AREAS). */
+  cluster_area?: string
   words: WordIn[]
 }
 
@@ -36,6 +38,9 @@ export function validate(file: VocabFile): string[] {
   const problems: string[] = []
   if (file.language !== 'en' && file.language !== 'es') problems.push(`language must be "en" or "es"`)
   if (!Array.isArray(file.words) || file.words.length === 0) problems.push('words must be a non-empty list')
+  if (file.cluster_area && !(AREAS as readonly string[]).includes(file.cluster_area)) {
+    problems.push(`cluster_area must be one of ${AREAS.join(', ')}`)
+  }
 
   const seen = new Set<string>()
   for (const [i, w] of (file.words ?? []).entries()) {

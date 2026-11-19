@@ -8,6 +8,7 @@ import { Login } from './screens/Login'
 import { Pool } from './screens/Pool'
 import { Session } from './screens/Session'
 import { SettingsScreen } from './screens/SettingsScreen'
+import { Topic } from './screens/Topic'
 import { DataProvider } from './state/DataProvider'
 
 const TABS = [
@@ -28,6 +29,7 @@ function Shell() {
           <Route path="/" element={<LearnHome />} />
           <Route path="/learn/:language/:direction" element={<Session />} />
           <Route path="/pool" element={<Pool />} />
+          <Route path="/pool/:language/:topicId" element={<Topic />} />
           <Route path="/add" element={<Add />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="*" element={<Navigate to="/" replace />} />

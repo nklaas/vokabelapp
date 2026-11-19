@@ -44,6 +44,9 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
 - Group words into **clusters** = topics with English names ("Environment & Climate", "Work & Career").
   Always add to an existing cluster when the topic fits – clusters have no size limit and keep growing
   (more academic words go into "Academic Writing"). Create a new cluster only for a new topic.
+- Every cluster belongs to one **area**, which groups the topics in the pool: Everyday Life, People & Feelings,
+  Work & Money, Society & Politics, Science & Technology, Academic & Language. A new cluster needs `cluster_area`
+  in its file (the import refuses otherwise); suggest the area in the review table.
 
 ## File format
 
@@ -52,6 +55,7 @@ the import completes each draft in place. If a draft is a typo or unclear, ask t
   "language": "es",
   "cluster": "Environment & Climate",
   "cluster_description": "Climate change, pollution, nature, energy",
+  "cluster_area": "Science & Technology",
   "words": [
     {
       "term": "la sequía",

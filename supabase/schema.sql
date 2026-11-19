@@ -31,6 +31,7 @@ create table clusters (
   language    text not null check (language in ('en', 'es')),
   name        text not null,
   description text,
+  area        text,                        -- one of the fixed areas in src/types.ts (AREAS), groups topics in the pool
   created_by  uuid default auth.uid() references auth.users on delete set null,
   created_at  timestamptz not null default now(),
   unique (language, name)

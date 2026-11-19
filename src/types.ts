@@ -24,7 +24,19 @@ export interface Cluster {
   language: Language
   name: string
   description: string | null
+  /** One of AREAS; groups the topics in the pool. Topics without one are listed under "Other topics". */
+  area: string | null
 }
+
+/** The fixed areas that group the clusters (topics) in the pool, same for both languages. */
+export const AREAS = [
+  'Everyday Life',
+  'People & Feelings',
+  'Work & Money',
+  'Society & Politics',
+  'Science & Technology',
+  'Academic & Language',
+] as const
 
 export interface Vocab {
   id: string

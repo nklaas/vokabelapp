@@ -31,8 +31,20 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
   - Phone: quick add (word only, flagged as draft, completed later by Claude Code) and a full manual form.
 
 ## Activation
-- Bulk activation from the pool: filter → select all / deselect some → activate in a chosen direction. "Select all"
-  adds the words shown to the selection, so words picked under other filters stay selected.
+- The pool opens on its **topics** (clusters), grouped into six fixed areas (Everyday Life, People & Feelings,
+  Work & Money, Society & Politics, Science & Technology, Academic & Language; topics without an area under
+  "Other topics"). Areas are folded; open ones are remembered on the device. Each topic shows its level range and
+  how many of its words are being learned. On top, **Continue** lists the started, unfinished topics (the 3 most
+  recently activated, "show all" for the rest). The search finds words (by term or German translation) and topics.
+  Words without topic and drafts have their own small lists.
+- A topic shows its words: new words first, easiest level first, then the words already being learned (dimmed),
+  drafts last. Level chips (B1–C2) narrow the list; none selected = all.
+- **Main direction German → foreign:** a word counts as "new" / "being learned" by its card in that direction.
+  The button "Learn N new words" activates the next N new words (default 10, adjustable, remembered on the device);
+  ticking words instead activates exactly those. A small link offers the reverse direction. Activating starts a
+  learning session right away (if new words are due immediately); the new words always take part in it, even
+  beyond the session size or when an unfinished session is continued.
+- Ticked words that are already active can be deactivated from the same bar.
 - A word can be active at most once per direction. Activating again shows which words are already active and in which
   phase, with the option to reset them to phase 1 or skip them.
 - Learned words can be reactivated (back to phase 1).
@@ -40,7 +52,8 @@ Free to run: web app (PWA) on GitHub Pages, data in Supabase (free tier), AI wor
 
 ## Learning
 - Four folders: DE→EN, EN→DE, DE→ES, ES→DE, each showing how many words are left today: the due words plus the
-  wrongly answered words of an unfinished session that still need repeating.
+  wrongly answered words of an unfinished session that still need repeating. The foreign → German folders only
+  appear once a word is active there. A German → foreign folder with nothing due offers "+ Add new words" (Pool).
 - The answer is typed.
 - Exactly correct → next word immediately.
 - Otherwise (typo, missing accent, wrong word) → show the typed answer (plain) and the correct answer plus the full entry.

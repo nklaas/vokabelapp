@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { WordDetail } from '../components/WordDetail'
 import { checkAnswer, marks, type CheckResult, type DiffChar } from '../lib/answer'
 import { saveReview } from '../lib/db'
@@ -61,16 +61,29 @@ export function Session() {
   // An unfinished session from earlier today is continued instead.
   const storageKey = sessionKey(userId, language, direction)
   const [now] = useState(() => new Date())
+  // Words just activated in the pool ("Learn 10 new words") always take part, even beyond the session size.
+  const location = useLocation()
   const [start] = useState<SavedSession>(() => {
+    const addIds = new Set((location.state as { add?: string[] } | null)?.add ?? [])
+    const added = shuffle(cards.filter((c) => addIds.has(c.id) && c.direction === direction && isDue(c, now)))
     const saved = resumeSession(storageKey, cards, now)
-    if (saved) return saved
+    if (saved) {
+      const inQueue = new Set(saved.queue.map((i) => i.cardId))
+      const extra = added.filter((c) => !inQueue.has(c.id) && needsIntro(c))
+      return extra.length ? { ...saved, queue: [...saved.queue, ...buildQueue(extra)], total: saved.total + extra.length } : saved
+    }
     const due = cards.filter(
-      (c) => c.direction === direction && isDue(c, now) && vocabById.get(c.vocab_id)?.language === language,
+      (c) => c.direction === direction && isDue(c, now) && !addIds.has(c.id) && vocabById.get(c.vocab_id)?.language === language,
     )
-    const queue = buildQueue(shuffle(due).slice(0, settings.session_size))
+    const picked = [...added, ...shuffle(due)].slice(0, Math.max(settings.session_size, added.length))
+    const queue = buildQueue(picked)
     const total = new Set(queue.map((i) => i.cardId)).size
     return { day: startOfToday(now).toISOString(), queue, total, stats: { right: 0, wrong: 0 } }
   })
+  // The added words are now part of the saved session; forget them so a reload does not add them twice.
+  useEffect(() => {
+    if (location.state) navigate(location.pathname, { replace: true, state: null })
+  }, [location, navigate])
   const [queue, setQueue] = useState<Item[]>(start.queue)
   const total = start.total
   const [typed, setTyped] = useState('')

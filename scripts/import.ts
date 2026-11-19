@@ -32,6 +32,15 @@ const { data: clusters, error: clusterError } = await db.from('clusters').select
 if (clusterError) throw clusterError
 const clusterIds = new Map(clusters.map((c) => [c.name.toLowerCase(), c.id as string]))
 
+// A new cluster needs an area, so it is grouped in the pool. Checked before anything is written.
+const newClusters = [...new Set(file.words.map((w) => w.cluster ?? file.cluster!))].filter((n) => !clusterIds.has(n.toLowerCase()))
+const withoutArea = newClusters.filter((n) => n !== file.cluster || !file.cluster_area)
+if (withoutArea.length) {
+  console.error(`Not imported: new cluster(s) ${withoutArea.map((n) => `"${n}"`).join(', ')} need an area. ` +
+    'Set "cluster" and "cluster_area" on the file (one new cluster per file).')
+  process.exit(1)
+}
+
 const { data: existing, error: vocabError } = await db
   .from('vocab')
   .select('id, term, word_type, is_draft')
@@ -44,7 +53,7 @@ async function clusterId(name: string): Promise<string> {
   if (dryRun) return `(new cluster "${name}")`
   const { data, error } = await db
     .from('clusters')
-    .insert({ language: file.language, name, description: name === file.cluster ? file.cluster_description ?? null : null })
+    .insert({ language: file.language, name, description: file.cluster_description ?? null, area: file.cluster_area })
     .select('id')
     .single()
   if (error) throw error
